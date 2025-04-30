@@ -9,11 +9,17 @@ local aimPartName = "Head" -- Part to aim at
 local currentKey = Enum.KeyCode.E -- Default aim lock key
 local fovVisible = true -- FOV circle visibility state
 local currentTarget = nil -- Track the current target to prevent jitter
-local smoothingFactor = 1-- Smoothing factor for camera interpolation (0 to 1, lower = smoother)
+local smoothingFactor = 1 -- Smoothing factor for camera interpolation (0 to 1, lower = smoother)
+local buttonsVisible = true -- Track button visibility state
+local randomAimPart = nil -- Store the randomly selected aim part when aim lock is activated
 
 -- Preset FOV sizes to cycle through
 local fovSizes = {10, 15, 20, 25}
 local currentFovIndex = 2 -- Start at 60 (index 2 in fovSizes)
+
+-- Preset aim parts to cycle through
+local aimParts = {"Head", "HumanoidRootPart", "Random"}
+local currentAimPartIndex = 1 -- Start at Head (index 1 in aimParts)
 
 -- Wait for PlayerGui to be available
 if not player:WaitForChild("PlayerGui", 5) then
@@ -140,6 +146,29 @@ adjustButtonStroke.Thickness = 1
 adjustButtonStroke.Transparency = 0.5
 print("FOV Adjust Button created")
 
+-- Create Aim Part Button
+local aimPartButton = Instance.new("TextButton")
+aimPartButton.Parent = screenGui
+aimPartButton.Size = UDim2.new(0.1, 0, 0.05, 0) -- Scale-based size
+aimPartButton.Position = UDim2.new(0.5, 20, 0.26, 0) -- Below the FOV adjust button
+aimPartButton.BackgroundColor3 = Color3.fromRGB(150, 50, 150) -- Purple background
+aimPartButton.Text = "Aim Part: " .. aimPartName -- Initial text
+aimPartButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+aimPartButton.TextScaled = true
+aimPartButton.ZIndex = 100
+aimPartButton.BorderSizePixel = 0
+aimPartButton.Visible = true
+local aimPartButtonCorner = Instance.new("UICorner")
+aimPartButtonCorner.CornerRadius = UDim.new(0, 8)
+aimPartButtonCorner.Parent = aimPartButton
+-- Add a border
+local aimPartButtonStroke = Instance.new("UIStroke")
+aimPartButtonStroke.Parent = aimPartButton
+aimPartButtonStroke.Color = Color3.fromRGB(255, 255, 255)
+aimPartButtonStroke.Thickness = 1
+aimPartButtonStroke.Transparency = 0.5
+print("Aim Part Button created")
+
 -- Create Unload Button
 local unloadButton = Instance.new("TextButton")
 unloadButton.Parent = screenGui
@@ -174,9 +203,12 @@ local function isWithinFOV(targetPos, camCFrame)
 end
 
 local function getClosestPlayer()
+    -- Determine the part to aim at
+    local effectiveAimPart = aimPartName == "Random" and randomAimPart or aimPartName
+
     -- If we have a current target, check if it's still valid
-    if currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild(aimPartName) then
-        local aimPart = currentTarget.Character[aimPartName]
+    if currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild(effectiveAimPart) then
+        local aimPart = currentTarget.Character[effectiveAimPart]
         local charPos = aimPart.Position
         local mousePos = mouse.Hit.Position
         local cam = workspace.CurrentCamera
@@ -195,8 +227,8 @@ local function getClosestPlayer()
     local cam = workspace.CurrentCamera
 
     for _, v in ipairs(game.Players:GetPlayers()) do
-        if v ~= player and v.Character and v.Character:FindFirstChild(aimPartName) then
-            local aimPart = v.Character[aimPartName]
+        if v ~= player and v.Character and v.Character:FindFirstChild(effectiveAimPart) then
+            local aimPart = v.Character[effectiveAimPart]
             local charPos = aimPart.Position
             local magnitude = (charPos - mousePos).Magnitude
             if magnitude < lastMagnitude and isWithinFOV(charPos, cam.CFrame) then
@@ -211,9 +243,12 @@ local function getClosestPlayer()
 end
 
 local function AimLock()
+    -- Determine the part to aim at
+    local effectiveAimPart = aimPartName == "Random" and randomAimPart or aimPartName
+
     local target = getClosestPlayer()
-    if target and target.Character and target.Character:FindFirstChild(aimPartName) then
-        local aimPartPos = target.Character[aimPartName].Position
+    if target and target.Character and target.Character:FindFirstChild(effectiveAimPart) then
+        local aimPartPos = target.Character[effectiveAimPart].Position
         local cam = workspace.CurrentCamera
         local pos = cam.CFrame.Position
         local targetCFrame = CFrame.new(pos, aimPartPos)
@@ -251,6 +286,15 @@ local function adjustFOV()
     print("FOV adjusted to: ", fovAngle)
 end
 
+-- Function to cycle aim parts
+local function adjustAimPart()
+    -- Increment the index, looping back to 1 if exceeding the table length
+    currentAimPartIndex = (currentAimPartIndex % #aimParts) + 1
+    aimPartName = aimParts[currentAimPartIndex]
+    aimPartButton.Text = "Aim Part: " .. aimPartName
+    print("Aim part adjusted to: ", aimPartName)
+end
+
 -- Function to update key binding
 local function updateKeyBinding()
     -- Disconnect existing input connections
@@ -266,6 +310,11 @@ local function updateKeyBinding()
     inputBeganConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed or input.KeyCode ~= currentKey then return end
         Aiming = true
+        -- Set random aim part when aim lock is activated if Random is selected
+        if aimPartName == "Random" then
+            randomAimPart = math.random() > 0.5 and "Head" or "HumanoidRootPart"
+            print("Random aim part selected: ", randomAimPart)
+        end
         print("Aim lock activated with key: ", currentKey.Name)
     end)
     table.insert(connections, inputBeganConnection)
@@ -274,9 +323,22 @@ local function updateKeyBinding()
         if gameProcessed or input.KeyCode ~= currentKey then return end
         Aiming = false
         currentTarget = nil -- Clear the target when aiming stops
+        randomAimPart = nil -- Clear random aim part when aim lock stops
         print("Aim lock deactivated")
     end)
     table.insert(connections, inputEndedConnection)
+end
+
+-- Function to toggle all buttons visibility
+local function toggleButtons()
+    buttonsVisible = not buttonsVisible
+    keyInput.Visible = buttonsVisible
+    fovToggleButton.Visible = buttonsVisible
+    fovAdjustButton.Visible = buttonsVisible
+    aimPartButton.Visible = buttonsVisible
+    unloadButton.Visible = buttonsVisible
+    targetLabel.Visible = buttonsVisible
+    print("Buttons Visible: ", buttonsVisible)
 end
 
 -- Handle key input from TextBox
@@ -341,10 +403,22 @@ table.insert(connections, fovAdjustButton.Activated:Connect(function()
     adjustFOV()
 end))
 
+-- Connect Aim Part button
+table.insert(connections, aimPartButton.Activated:Connect(function()
+    print("Aim Part Button clicked")
+    adjustAimPart()
+end))
+
 -- Connect unload button
 table.insert(connections, unloadButton.Activated:Connect(function()
     print("Unload Button clicked")
     unloadScript()
+end))
+
+-- Connect Right-Alt key for toggling buttons
+table.insert(connections, UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed or input.KeyCode ~= Enum.KeyCode.RightAlt then return end
+    toggleButtons()
 end))
 
 -- Update aim lock and FOV circle
