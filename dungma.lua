@@ -22,47 +22,50 @@ local aimParts = {"Head", "HumanoidRootPart", "Random"}
 local currentAimPartIndex = 1 -- Start at Head (index 1 in aimParts)
 
 -- Wait for PlayerGui to be available
-if not player:WaitForChild("PlayerGui", 5) then
-    error("PlayerGui not found")
+local success, playerGui = pcall(function()
+    return player:WaitForChild("PlayerGui", 5)
+end)
+if not success or not playerGui then
+    error("Failed to find PlayerGui: " .. (playerGui or "timeout"))
 end
 
 -- Create ScreenGui for GUI elements
 local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = player.PlayerGui
+screenGui.Parent = playerGui
 screenGui.IgnoreGuiInset = true
 screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-screenGui.Enabled = true -- Explicitly enable
+screenGui.Enabled = true
 
 -- Create circular Frame for FOV (outline only)
 local fovFrame = Instance.new("Frame")
 fovFrame.Parent = screenGui
-fovFrame.BackgroundTransparency = 1 -- Invisible background
+fovFrame.BackgroundTransparency = 1
 fovFrame.BorderSizePixel = 0
-fovFrame.Visible = true -- Initially visible
-fovFrame.ZIndex = 100 -- High ZIndex to avoid overlap
-fovFrame.AnchorPoint = Vector2.new(0.5, 0.5) -- Center the frame on its position
+fovFrame.Visible = true
+fovFrame.ZIndex = 100
+fovFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 
 -- Make the Frame circular
 local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(1, 0) -- Fully circular
+uiCorner.CornerRadius = UDim.new(1, 0)
 uiCorner.Parent = fovFrame
 
 -- Add UIStroke for outline
 local uiStroke = Instance.new("UIStroke")
 uiStroke.Parent = fovFrame
-uiStroke.Color = Color3.fromRGB(255, 255, 255) -- White outline
-uiStroke.Thickness = 4 -- Thicker outline for visibility
-uiStroke.Transparency = 0.2 -- Slightly transparent outline
+uiStroke.Color = Color3.fromRGB(255, 255, 255)
+uiStroke.Thickness = 4
+uiStroke.Transparency = 0.2
 
 -- Create TextLabel for aimlocked player
 local targetLabel = Instance.new("TextLabel")
 targetLabel.Parent = screenGui
-targetLabel.Size = UDim2.new(0.2, 0, 0.05, 0) -- Scale-based size
-targetLabel.Position = UDim2.new(0.5, 0, 0.02, 0) -- Top-center
+targetLabel.Size = UDim2.new(0.2, 0, 0.05, 0)
+targetLabel.Position = UDim2.new(0.5, 0, 0.02, 0)
 targetLabel.BackgroundTransparency = 0.5
-targetLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background
-targetLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text
+targetLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+targetLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 targetLabel.Text = "Target: None"
 targetLabel.TextScaled = true
 targetLabel.ZIndex = 100
@@ -77,11 +80,11 @@ labelStroke.Transparency = 0.5
 -- Create TextBox for setting aim lock key
 local keyInput = Instance.new("TextBox")
 keyInput.Parent = screenGui
-keyInput.Size = UDim2.new(0.05, 0, 0.05, 0) -- Scale-based size
-keyInput.Position = UDim2.new(0.5, -120, 0.1, 0) -- Below-left of target label with offset
-keyInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- Dark gray background
+keyInput.Size = UDim2.new(0.05, 0, 0.05, 0)
+keyInput.Position = UDim2.new(0.5, -120, 0.1, 0)
+keyInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 keyInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-keyInput.Text = "E" -- Default key
+keyInput.Text = "E"
 keyInput.TextScaled = true
 keyInput.ZIndex = 100
 keyInput.PlaceholderText = "Key"
@@ -99,9 +102,9 @@ keyStroke.Transparency = 0.5
 -- Create Toggle FOV Button
 local fovToggleButton = Instance.new("TextButton")
 fovToggleButton.Parent = screenGui
-fovToggleButton.Size = UDim2.new(0.1, 0, 0.05, 0) -- Scale-based size
-fovToggleButton.Position = UDim2.new(0.5, 20, 0.1, 0) -- Below-right of target label with offset
-fovToggleButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50) -- Green when FOV on
+fovToggleButton.Size = UDim2.new(0.1, 0, 0.05, 0)
+fovToggleButton.Position = UDim2.new(0.5, 20, 0.1, 0)
+fovToggleButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
 fovToggleButton.Text = "Hide FOV"
 fovToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 fovToggleButton.TextScaled = true
@@ -121,10 +124,10 @@ fovButtonStroke.Transparency = 0.5
 -- Create Adjust FOV Button
 local fovAdjustButton = Instance.new("TextButton")
 fovAdjustButton.Parent = screenGui
-fovAdjustButton.Size = UDim2.new(0.1, 0, 0.05, 0) -- Scale-based size
-fovAdjustButton.Position = UDim2.new(0.5, 20, 0.18, 0) -- Below the FOV toggle button
-fovAdjustButton.BackgroundColor3 = Color3.fromRGB(50, 50, 150) -- Blue background
-fovAdjustButton.Text = "FOV: " .. fovAngle -- Initial text
+fovAdjustButton.Size = UDim2.new(0.1, 0, 0.05, 0)
+fovAdjustButton.Position = UDim2.new(0.5, 20, 0.18, 0)
+fovAdjustButton.BackgroundColor3 = Color3.fromRGB(50, 50, 150)
+fovAdjustButton.Text = "FOV: " .. fovAngle
 fovAdjustButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 fovAdjustButton.TextScaled = true
 fovAdjustButton.ZIndex = 100
@@ -143,10 +146,10 @@ adjustButtonStroke.Transparency = 0.5
 -- Create Aim Part Button
 local aimPartButton = Instance.new("TextButton")
 aimPartButton.Parent = screenGui
-aimPartButton.Size = UDim2.new(0.1, 0, 0.05, 0) -- Scale-based size
-aimPartButton.Position = UDim2.new(0.5, 20, 0.26, 0) -- Below the FOV adjust button
-aimPartButton.BackgroundColor3 = Color3.fromRGB(150, 50, 150) -- Purple background
-aimPartButton.Text = "Aim Part: " .. aimPartName -- Initial text
+aimPartButton.Size = UDim2.new(0.1, 0, 0.05, 0)
+aimPartButton.Position = UDim2.new(0.5, 20, 0.26, 0)
+aimPartButton.BackgroundColor3 = Color3.fromRGB(150, 50, 150)
+aimPartButton.Text = "Aim Part: " .. aimPartName
 aimPartButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 aimPartButton.TextScaled = true
 aimPartButton.ZIndex = 100
@@ -165,9 +168,9 @@ aimPartButtonStroke.Transparency = 0.5
 -- Create Unload Button
 local unloadButton = Instance.new("TextButton")
 unloadButton.Parent = screenGui
-unloadButton.Size = UDim2.new(0.1, 0, 0.05, 0) -- Scale-based size
-unloadButton.Position = UDim2.new(0.9, 0, 0.02, 0) -- Top-right
-unload vehicle's = Color3.fromRGB(255, 50, 50) -- Red background
+unloadButton.Size = UDim2.new(0.1, 0, 0.05, 0)
+unloadButton.Position = UDim2.new(0.9, 0, 0.02, 0)
+unloadButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 unloadButton.Text = "Unload Script"
 unloadButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 unloadButton.TextScaled = true
@@ -206,9 +209,9 @@ local function getClosestPlayer()
         local cam = workspace.CurrentCamera
         local magnitude = (charPos - mousePos).Magnitude
         if magnitude <= maxDistance and isWithinFOV(charPos, cam.CFrame) then
-            return currentTarget -- Keep the current target
+            return currentTarget
         else
-            currentTarget = nil -- Clear the target if out of range or FOV
+            currentTarget = nil
         end
     end
 
@@ -230,7 +233,7 @@ local function getClosestPlayer()
         end
     end
 
-    currentTarget = closestPlayer -- Update the current target
+    currentTarget = closestPlayer
     return closestPlayer
 end
 
@@ -244,7 +247,6 @@ local function AimLock()
         local cam = workspace.CurrentCamera
         local pos = cam.CFrame.Position
         local targetCFrame = CFrame.new(pos, aimPartPos)
-        -- Smoothly interpolate the camera's CFrame
         cam.CFrame = cam.CFrame:Lerp(targetCFrame, smoothingFactor)
         targetLabel.Text = "Target: " .. target.Name
     else
@@ -254,21 +256,19 @@ end
 
 local function updateFOVCircle()
     local cam = workspace.CurrentCamera
+    if not cam then return end
     local screenSize = cam.ViewportSize
-    local center = UserInputService:GetMouseLocation() -- More reliable mouse position
+    local center = UserInputService:GetMouseLocation()
 
-    -- Calculate FOV radius in pixels
     local camFOV = cam.FieldOfView
     local fovRadius = math.tan(math.rad(fovAngle / 2)) / math.tan(math.rad(camFOV / 2)) * screenSize.Y / 2
 
-    -- Update FOV circle, centering on mouse
     fovFrame.Size = UDim2.new(0, fovRadius * 2, 0, fovRadius * 2)
-    fovFrame.Position = UDim2.fromOffset(center.X, center.Y) -- Explicit pixel offset
+    fovFrame.Position = UDim2.fromOffset(center.X, center.Y)
 end
 
 -- Function to cycle FOV sizes
 local function adjustFOV()
-    -- Increment the index, looping back to 1 if exceeding the table length
     currentFovIndex = (currentFovIndex % #fovSizes) + 1
     fovAngle = fovSizes[currentFovIndex]
     fovAdjustButton.Text = "FOV: " .. fovAngle
@@ -276,7 +276,6 @@ end
 
 -- Function to cycle aim parts
 local function adjustAimPart()
-    -- Increment the index, looping back to 1 if exceeding the table length
     currentAimPartIndex = (currentAimPartIndex % #aimParts) + 1
     aimPartName = aimParts[currentAimPartIndex]
     aimPartButton.Text = "Aim Part: " .. aimPartName
@@ -284,7 +283,6 @@ end
 
 -- Function to update key binding
 local function updateKeyBinding()
-    -- Disconnect existing input connections
     for i = #connections, 1, -1 do
         local connection = connections[i]
         if connection == inputBeganConnection or connection == inputEndedConnection then
@@ -293,11 +291,9 @@ local function updateKeyBinding()
         end
     end
 
-    -- Connect new input events
     inputBeganConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed or input.KeyCode ~= currentKey then return end
         Aiming = true
-        -- Set random aim part when aim lock is activated if Random is selected
         if aimPartName == "Random" then
             randomAimPart = math.random() > 0.5 and "Head" or "HumanoidRootPart"
         end
@@ -307,8 +303,8 @@ local function updateKeyBinding()
     inputEndedConnection = UserInputService.InputEnded:Connect(function(input, gameProcessed)
         if gameProcessed or input.KeyCode ~= currentKey then return end
         Aiming = false
-        currentTarget = nil -- Clear the target when aiming stops
-        randomAimPart = nil -- Clear random aim part when aim lock stops
+        currentTarget = nil
+        randomAimPart = nil
     end)
     table.insert(connections, inputEndedConnection)
 end
@@ -326,14 +322,14 @@ end
 
 -- Handle key input from TextBox
 local function onKeyInput()
-    local input = keyInput.Text:upper():sub(1, 1) -- Get first character, uppercase
+    local input = keyInput.Text:upper():sub(1, 1)
     local keyCode = Enum.KeyCode[input]
     if keyCode then
         currentKey = keyCode
-        keyInput.Text = input -- Update TextBox to show valid key
+        keyInput.Text = input
         updateKeyBinding()
     else
-        keyInput.Text = currentKey.Name -- Revert to current key if invalid
+        keyInput.Text = currentKey.Name
     end
 end
 
@@ -347,13 +343,10 @@ end
 
 -- Function to unload the script
 local function unloadScript()
-    -- Disconnect all stored connections
     for _, connection in ipairs(connections) do
         connection:Disconnect()
     end
     connections = {}
-    
-    -- Destroy the ScreenGui
     screenGui:Destroy()
 end
 
