@@ -33,7 +33,6 @@ screenGui.IgnoreGuiInset = true
 screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Enabled = true -- Explicitly enable
-print("ScreenGui created and parented to PlayerGui")
 
 -- Create circular Frame for FOV (outline only)
 local fovFrame = Instance.new("Frame")
@@ -43,7 +42,6 @@ fovFrame.BorderSizePixel = 0
 fovFrame.Visible = true -- Initially visible
 fovFrame.ZIndex = 100 -- High ZIndex to avoid overlap
 fovFrame.AnchorPoint = Vector2.new(0.5, 0.5) -- Center the frame on its position
-print("FOV Frame created")
 
 -- Make the Frame circular
 local uiCorner = Instance.new("UICorner")
@@ -75,7 +73,6 @@ labelStroke.Parent = targetLabel
 labelStroke.Color = Color3.fromRGB(255, 255, 255)
 labelStroke.Thickness = 1
 labelStroke.Transparency = 0.5
-print("Target Label created")
 
 -- Create TextBox for setting aim lock key
 local keyInput = Instance.new("TextBox")
@@ -98,7 +95,6 @@ keyStroke.Parent = keyInput
 keyStroke.Color = Color3.fromRGB(255, 255, 255)
 keyStroke.Thickness = 1
 keyStroke.Transparency = 0.5
-print("Key Input TextBox created")
 
 -- Create Toggle FOV Button
 local fovToggleButton = Instance.new("TextButton")
@@ -121,7 +117,6 @@ fovButtonStroke.Parent = fovToggleButton
 fovButtonStroke.Color = Color3.fromRGB(255, 255, 255)
 fovButtonStroke.Thickness = 1
 fovButtonStroke.Transparency = 0.5
-print("FOV Toggle Button created")
 
 -- Create Adjust FOV Button
 local fovAdjustButton = Instance.new("TextButton")
@@ -144,7 +139,6 @@ adjustButtonStroke.Parent = fovAdjustButton
 adjustButtonStroke.Color = Color3.fromRGB(255, 255, 255)
 adjustButtonStroke.Thickness = 1
 adjustButtonStroke.Transparency = 0.5
-print("FOV Adjust Button created")
 
 -- Create Aim Part Button
 local aimPartButton = Instance.new("TextButton")
@@ -167,14 +161,13 @@ aimPartButtonStroke.Parent = aimPartButton
 aimPartButtonStroke.Color = Color3.fromRGB(255, 255, 255)
 aimPartButtonStroke.Thickness = 1
 aimPartButtonStroke.Transparency = 0.5
-print("Aim Part Button created")
 
 -- Create Unload Button
 local unloadButton = Instance.new("TextButton")
 unloadButton.Parent = screenGui
 unloadButton.Size = UDim2.new(0.1, 0, 0.05, 0) -- Scale-based size
 unloadButton.Position = UDim2.new(0.9, 0, 0.02, 0) -- Top-right
-unloadButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50) -- Red background
+unload vehicle's = Color3.fromRGB(255, 50, 50) -- Red background
 unloadButton.Text = "Unload Script"
 unloadButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 unloadButton.TextScaled = true
@@ -190,7 +183,6 @@ unloadButtonStroke.Parent = unloadButton
 unloadButtonStroke.Color = Color3.fromRGB(255, 255, 231)
 unloadButtonStroke.Thickness = 1
 unloadButtonStroke.Transparency = 0.5
-print("Unload Button created")
 
 -- Store event connections for cleanup
 local connections = {}
@@ -265,9 +257,6 @@ local function updateFOVCircle()
     local screenSize = cam.ViewportSize
     local center = UserInputService:GetMouseLocation() -- More reliable mouse position
 
-    -- Debug: Print mouse position
-    print("Mouse Position: ", center.X, center.Y)
-
     -- Calculate FOV radius in pixels
     local camFOV = cam.FieldOfView
     local fovRadius = math.tan(math.rad(fovAngle / 2)) / math.tan(math.rad(camFOV / 2)) * screenSize.Y / 2
@@ -283,7 +272,6 @@ local function adjustFOV()
     currentFovIndex = (currentFovIndex % #fovSizes) + 1
     fovAngle = fovSizes[currentFovIndex]
     fovAdjustButton.Text = "FOV: " .. fovAngle
-    print("FOV adjusted to: ", fovAngle)
 end
 
 -- Function to cycle aim parts
@@ -292,7 +280,6 @@ local function adjustAimPart()
     currentAimPartIndex = (currentAimPartIndex % #aimParts) + 1
     aimPartName = aimParts[currentAimPartIndex]
     aimPartButton.Text = "Aim Part: " .. aimPartName
-    print("Aim part adjusted to: ", aimPartName)
 end
 
 -- Function to update key binding
@@ -313,9 +300,7 @@ local function updateKeyBinding()
         -- Set random aim part when aim lock is activated if Random is selected
         if aimPartName == "Random" then
             randomAimPart = math.random() > 0.5 and "Head" or "HumanoidRootPart"
-            print("Random aim part selected: ", randomAimPart)
         end
-        print("Aim lock activated with key: ", currentKey.Name)
     end)
     table.insert(connections, inputBeganConnection)
 
@@ -324,7 +309,6 @@ local function updateKeyBinding()
         Aiming = false
         currentTarget = nil -- Clear the target when aiming stops
         randomAimPart = nil -- Clear random aim part when aim lock stops
-        print("Aim lock deactivated")
     end)
     table.insert(connections, inputEndedConnection)
 end
@@ -338,7 +322,6 @@ local function toggleButtons()
     aimPartButton.Visible = buttonsVisible
     unloadButton.Visible = buttonsVisible
     targetLabel.Visible = buttonsVisible
-    print("Buttons Visible: ", buttonsVisible)
 end
 
 -- Handle key input from TextBox
@@ -349,10 +332,8 @@ local function onKeyInput()
         currentKey = keyCode
         keyInput.Text = input -- Update TextBox to show valid key
         updateKeyBinding()
-        print("Aim lock key set to: ", input)
     else
         keyInput.Text = currentKey.Name -- Revert to current key if invalid
-        print("Invalid key entered: ", input)
     end
 end
 
@@ -362,7 +343,6 @@ local function toggleFOV()
     fovFrame.Visible = fovVisible
     fovToggleButton.Text = fovVisible and "Hide FOV" or "Show FOV"
     fovToggleButton.BackgroundColor3 = fovVisible and Color3.fromRGB(50, 150, 50) or Color3.fromRGB(150, 50, 50)
-    print("FOV Visible: ", fovVisible)
 end
 
 -- Function to unload the script
@@ -374,11 +354,7 @@ local function unloadScript()
     connections = {}
     
     -- Destroy the ScreenGui
-    print("Destroying ScreenGui")
     screenGui:Destroy()
-    
-    -- Print confirmation
-    print("Script unloaded successfully")
 end
 
 -- Initialize input connections
@@ -387,31 +363,26 @@ updateKeyBinding()
 
 -- Connect TextBox input
 table.insert(connections, keyInput.FocusLost:Connect(function()
-    print("Key TextBox input received")
     onKeyInput()
 end))
 
 -- Connect FOV toggle button
 table.insert(connections, fovToggleButton.Activated:Connect(function()
-    print("FOV Toggle Button clicked")
     toggleFOV()
 end))
 
 -- Connect FOV adjust button
 table.insert(connections, fovAdjustButton.Activated:Connect(function()
-    print("FOV Adjust Button clicked")
     adjustFOV()
 end))
 
 -- Connect Aim Part button
 table.insert(connections, aimPartButton.Activated:Connect(function()
-    print("Aim Part Button clicked")
     adjustAimPart()
 end))
 
 -- Connect unload button
 table.insert(connections, unloadButton.Activated:Connect(function()
-    print("Unload Button clicked")
     unloadScript()
 end))
 
@@ -439,6 +410,5 @@ table.insert(connections, screenGui.AncestryChanged:Connect(function()
             connection:Disconnect()
         end
         connections = {}
-        print("ScreenGui destroyed due to ancestry change")
     end
 end))
