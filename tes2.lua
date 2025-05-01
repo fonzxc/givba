@@ -277,7 +277,7 @@ local function createBox(player)
 
     local uiStroke = Instance.new("UIStroke")
     uiStroke.Parent = boxFrame
-    uiStroke.Color = Color3.fromRGB(255, 0, 0)
+    uiStroke.Color = Color3.fromRGB(255, 255, 255) -- Changed to white
     uiStroke.Thickness = 2
     uiStroke.Transparency = 0.3
 
@@ -346,14 +346,49 @@ local function updateESP()
             local nameLabel = espElements[p].name
 
             -- Update Box
-            local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(rootPart.Position)
-            if onScreen and head then
-                local headPos = workspace.CurrentCamera:WorldToViewportPoint(head.Position)
-                local feetPos = workspace.CurrentCamera:WorldToViewportPoint(rootPart.Position - Vector3.new(0, 4, 0))
-                local boxSize = Vector2.new(math.abs(headPos.X - feetPos.X) * 2, math.abs(headPos.Y - feetPos.Y) * 1.5)
-                box.Size = UDim2.new(0, boxSize.X, 0, boxSize.Y)
-                box.Position = UDim2.new(0, headPos.X - boxSize.X / 2, 0, headPos.Y - boxSize.Y / 2)
-                box.Visible = boxEspEnabled
+            if p.Character then
+                local character = p.Character
+                local bboxCFrame, bboxSize = character:GetBoundingBox()
+                local corners = {}
+                for x = -1, 1, 2 do
+                    for y = -1, 1, 2 do
+                        for z = -1, 1, 2 do
+                            local corner = bboxCFrame * Vector3.new(x * bboxSize.X / 2, y * bboxSize.Y / 2, z * bboxSize.Z / 2)
+                            table.insert(corners, corner)
+                        end
+                    end
+                end
+                local visiblePoints = {}
+                for _, corner in ipairs(corners) do
+                    local screenPos, _ = workspace.CurrentCamera:WorldToViewportPoint(corner)
+                    if screenPos.Z > 0 then -- Only include points in front of the camera
+                        table.insert(visiblePoints, screenPos)
+                    end
+                end
+                if #visiblePoints > 0 then
+                    local minX, minY, maxX, maxY = visiblePoints[1].X, visiblePoints[1].Y, visiblePoints[1].X, visiblePoints[1].Y
+                    for i = 2, #visiblePoints do
+                        local sp = visiblePoints[i]
+                        if sp.X < minX then minX = sp.X end
+                        if sp.X > maxX then maxX = sp.X end
+                        if sp.Y < minY then minY = sp.Y end
+                        if sp.Y > maxY then maxY = sp.Y end
+                    end
+                    -- Clamp to screen boundaries
+                    local screenMinX = math.max(minX, 0)
+                    local screenMaxX = math.min(maxX, workspace.CurrentCamera.ViewportSize.X)
+                    local screenMinY = math.max(minY, 0)
+                    local screenMaxY = math.min(maxY, workspace.CurrentCamera.ViewportSize.Y)
+                    if screenMinX < screenMaxX and screenMinY < screenMaxY then
+                        box.Size = UDim2.new(0, screenMaxX - screenMinX, 0, screenMaxY - screenMinY)
+                        box.Position = UDim2.new(0, screenMinX, 0, screenMinY)
+                        box.Visible = boxEspEnabled
+                    else
+                        box.Visible = false
+                    end
+                else
+                    box.Visible = false
+                end
             else
                 box.Visible = false
             end
@@ -361,6 +396,7 @@ local function updateESP()
             -- Update Distance
             local distance = (player.Character and player.Character.HumanoidRootPart and rootPart) and (player.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude or 0
             distanceLabel.Text = string.format("%.1f studs", distance)
+            local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(rootPart.Position)
             if onScreen then
                 distanceLabel.Position = UDim2.new(0, screenPos.X - 50, 0, screenPos.Y + 20)
                 distanceLabel.Visible = distanceEspEnabled
