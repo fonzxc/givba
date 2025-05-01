@@ -198,28 +198,17 @@ local function isWithinFOV(targetPos, camCFrame)
 end
 
 local function getClosestPlayer()
-    -- Determine the part to aim at
-    local effectiveAimPart = aimPartName == "Random" and randomAimPart or aimPartName
-
-    -- If we have a current target, check if it's still valid
-    if currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild(effectiveAimPart) then
-        local aimPart = currentTarget.Character[effectiveAimPart]
-        local charPos = aimPart.Position
-        local mousePos = mouse.Hit.Position
-        local cam = workspace.CurrentCamera
-        local magnitude = (charPos - mousePos).Magnitude
-        if magnitude <= maxDistance and isWithinFOV(charPos, cam.CFrame) then
-            return currentTarget
-        else
-            currentTarget = nil
-        end
+    -- If we already have a locked target, keep it
+    if currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild(aimPartName == "Random" and randomAimPart or aimPartName) then
+        return currentTarget
     end
 
-    -- Find a new target if none exists or the current one is invalid
+    -- Find a new target only if we don't have one
     local closestPlayer = nil
     local lastMagnitude = maxDistance
     local mousePos = mouse.Hit.Position
     local cam = workspace.CurrentCamera
+    local effectiveAimPart = aimPartName == "Random" and randomAimPart or aimPartName
 
     for _, v in ipairs(game.Players:GetPlayers()) do
         if v ~= player and v.Character and v.Character:FindFirstChild(effectiveAimPart) then
@@ -238,10 +227,9 @@ local function getClosestPlayer()
 end
 
 local function AimLock()
-    -- Determine the part to aim at
     local effectiveAimPart = aimPartName == "Random" and randomAimPart or aimPartName
-
     local target = getClosestPlayer()
+
     if target and target.Character and target.Character:FindFirstChild(effectiveAimPart) then
         local aimPartPos = target.Character[effectiveAimPart].Position
         local cam = workspace.CurrentCamera
@@ -251,6 +239,7 @@ local function AimLock()
         targetLabel.Text = "Target: " .. target.Name
     else
         targetLabel.Text = "Target: None"
+        currentTarget = nil -- Clear target if it's no longer valid
     end
 end
 
