@@ -37,7 +37,7 @@ local settingsFrame = Instance.new("Frame")
 settingsFrame.Parent = screenGui
 settingsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 settingsFrame.BorderSizePixel = 0
-settingsFrame.Position = UDim2.new(0.05, 0, 0.1, 0)
+settingsFrame.Position = UDim2.new(0.05, 0, 0, 0) -- At the top of the screen
 settingsFrame.Size = UDim2.new(0.15, 0, 0.6, 0)
 settingsFrame.ZIndex = 100
 local frameCorner = Instance.new("UICorner")
@@ -59,6 +59,26 @@ titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleLabel.TextScaled = true
 titleLabel.Size = UDim2.new(1, 0, 0, 30)
 titleLabel.ZIndex = 100
+titleLabel.LayoutOrder = 1
+
+-- Create target label
+local targetLabel = Instance.new("TextLabel")
+targetLabel.Parent = settingsFrame
+targetLabel.Size = UDim2.new(1, 0, 0, 30)
+targetLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+targetLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+targetLabel.Text = "Target: None"
+targetLabel.TextScaled = true
+targetLabel.ZIndex = 100
+targetLabel.LayoutOrder = 2
+local targetCorner = Instance.new("UICorner")
+targetCorner.CornerRadius = UDim.new(0, 8)
+targetCorner.Parent = targetLabel
+local targetStroke = Instance.new("UIStroke")
+targetStroke.Parent = targetLabel
+targetStroke.Color = Color3.fromRGB(255, 255, 255)
+targetStroke.Thickness = 1
+targetStroke.Transparency = 0.5
 
 -- Create TextBox for aim lock key
 local keyInput = Instance.new("TextBox")
@@ -70,6 +90,7 @@ keyInput.Text = "E"
 keyInput.TextScaled = true
 keyInput.PlaceholderText = "Key"
 keyInput.ZIndex = 100
+keyInput.LayoutOrder = 3
 local keyCorner = Instance.new("UICorner")
 keyCorner.CornerRadius = UDim.new(0, 8)
 keyCorner.Parent = keyInput
@@ -89,6 +110,7 @@ fovToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 fovToggleButton.TextScaled = true
 fovToggleButton.ZIndex = 100
 fovToggleButton.BorderSizePixel = 0
+fovToggleButton.LayoutOrder = 4
 local fovButtonCorner = Instance.new("UICorner")
 fovButtonCorner.CornerRadius = UDim.new(0, 8)
 fovButtonCorner.Parent = fovToggleButton
@@ -108,6 +130,7 @@ fovInput.Text = tostring(fovAngle)
 fovInput.TextScaled = true
 fovInput.PlaceholderText = "FOV (1-50)"
 fovInput.ZIndex = 100
+fovInput.LayoutOrder = 5
 local fovInputCorner = Instance.new("UICorner")
 fovInputCorner.CornerRadius = UDim.new(0, 8)
 fovInputCorner.Parent = fovInput
@@ -127,6 +150,7 @@ aimPartButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 aimPartButton.TextScaled = true
 aimPartButton.ZIndex = 100
 aimPartButton.BorderSizePixel = 0
+aimPartButton.LayoutOrder = 6
 local aimPartButtonCorner = Instance.new("UICorner")
 aimPartButtonCorner.CornerRadius = UDim.new(0, 8)
 aimPartButtonCorner.Parent = aimPartButton
@@ -146,6 +170,7 @@ smoothingInput.Text = tostring(smoothingFactor)
 smoothingInput.TextScaled = true
 smoothingInput.PlaceholderText = "Smoothing (0-1)"
 smoothingInput.ZIndex = 100
+smoothingInput.LayoutOrder = 7
 local smoothingCorner = Instance.new("UICorner")
 smoothingCorner.CornerRadius = UDim.new(0, 8)
 smoothingCorner.Parent = smoothingInput
@@ -165,6 +190,7 @@ boxEspToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 boxEspToggleButton.TextScaled = true
 boxEspToggleButton.ZIndex = 100
 boxEspToggleButton.BorderSizePixel = 0
+boxEspToggleButton.LayoutOrder = 8
 local boxEspButtonCorner = Instance.new("UICorner")
 boxEspButtonCorner.CornerRadius = UDim.new(0, 8)
 boxEspButtonCorner.Parent = boxEspToggleButton
@@ -184,6 +210,7 @@ distanceEspToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 distanceEspToggleButton.TextScaled = true
 distanceEspToggleButton.ZIndex = 100
 distanceEspToggleButton.BorderSizePixel = 0
+distanceEspToggleButton.LayoutOrder = 9
 local distanceEspButtonCorner = Instance.new("UICorner")
 distanceEspButtonCorner.CornerRadius = UDim.new(0, 8)
 distanceEspButtonCorner.Parent = distanceEspToggleButton
@@ -203,6 +230,7 @@ nameEspToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 nameEspToggleButton.TextScaled = true
 nameEspToggleButton.ZIndex = 100
 nameEspToggleButton.BorderSizePixel = 0
+nameEspToggleButton.LayoutOrder = 10
 local nameEspButtonCorner = Instance.new("UICorner")
 nameEspButtonCorner.CornerRadius = UDim.new(0, 8)
 nameEspButtonCorner.Parent = nameEspToggleButton
@@ -222,6 +250,7 @@ unloadButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 unloadButton.TextScaled = true
 unloadButton.ZIndex = 100
 unloadButton.BorderSizePixel = 0
+unloadButton.LayoutOrder = 11
 local buttonCorner = Instance.new("UICorner")
 buttonCorner.CornerRadius = UDim.new(0, 8)
 buttonCorner.Parent = unloadButton
@@ -247,25 +276,6 @@ uiStroke.Parent = fovFrame
 uiStroke.Color = Color3.fromRGB(255, 255, 255)
 uiStroke.Thickness = 4
 uiStroke.Transparency = 0.2
-
--- Create TextLabel for aimlocked player (styled consistently with buttons)
-local targetLabel = Instance.new("TextLabel")
-targetLabel.Parent = screenGui
-targetLabel.Size = UDim2.new(0.15, 0, 0, 30) -- Same height as buttons
-targetLabel.Position = UDim2.new(0.5, -targetLabel.Size.X.Offset / 2, 0.02, 0)
-targetLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- Match button background
-targetLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-targetLabel.Text = "Target: None"
-targetLabel.TextScaled = true
-targetLabel.ZIndex = 100
-local targetCorner = Instance.new("UICorner")
-targetCorner.CornerRadius = UDim.new(0, 8) -- Match button corner radius
-targetCorner.Parent = targetLabel
-local targetStroke = Instance.new("UIStroke")
-targetStroke.Parent = targetLabel
-targetStroke.Color = Color3.fromRGB(255, 255, 255)
-targetStroke.Thickness = 1
-targetStroke.Transparency = 0.5
 
 -- Store event connections
 local connections = {}
@@ -451,53 +461,60 @@ game.Players.PlayerRemoving:Connect(function(p)
     end
 end)
 
-local function isWithinFOV(targetPos, camCFrame)
-    local vectorToTarget = (targetPos - camCFrame.Position).Unit
-    local cameraForward = camCFrame.LookVector
-    local angle = math.deg(math.acos(vectorToTarget:Dot(cameraForward)))
-    return angle <= fovAngle / 2
+local function isWithinFOV(targetPos, mousePos)
+    local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(targetPos)
+    if not onScreen then return false end
+    local distance = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+    local cam = workspace.CurrentCamera
+    local camFOV = cam.FieldOfView
+    local screenSize = cam.ViewportSize
+    local fovRadius = math.tan(math.rad(fovAngle / 2)) / math.tan(math.rad(camFOV / 2)) * screenSize.Y / 2
+    return distance <= fovRadius
 end
 
-local function getClosestPlayer()
-    if currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild(aimPartName == "Random" and randomAimPart or aimPartName) then
-        return currentTarget
-    end
-
+local function getClosestPlayer(mousePos)
     local closestPlayer = nil
-    local lastMagnitude = maxDistance
-    local mousePos = mouse.Hit.Position
+    local lastDistance = math.huge
     local cam = workspace.CurrentCamera
     local effectiveAimPart = aimPartName == "Random" and randomAimPart or aimPartName
 
     for _, v in ipairs(game.Players:GetPlayers()) do
         if v ~= player and v.Character and v.Character:FindFirstChild(effectiveAimPart) then
             local aimPart = v.Character[effectiveAimPart]
-            local charPos = aimPart.Position
-            local magnitude = (charPos - mousePos).Magnitude
-            if magnitude < lastMagnitude and isWithinFOV(charPos, cam.CFrame) then
-                lastMagnitude = magnitude
-                closestPlayer = v
+            local screenPos, onScreen = cam:WorldToViewportPoint(aimPart.Position)
+            if onScreen and isWithinFOV(aimPart.Position, mousePos) then
+                local distance = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+                if distance < lastDistance then
+                    lastDistance = distance
+                    closestPlayer = v
+                end
             end
         end
     end
 
-    currentTarget = closestPlayer
     return closestPlayer
 end
 
 local function AimLock()
     local effectiveAimPart = aimPartName == "Random" and randomAimPart or aimPartName
-    local target = getClosestPlayer()
-
-    if target and target.Character and target.Character:FindFirstChild(effectiveAimPart) then
-        local aimPartPos = target.Character[effectiveAimPart].Position
-        local cam = workspace.CurrentCamera
-        local pos = cam.CFrame.Position
-        local targetCFrame = CFrame.new(pos, aimPartPos)
-        cam.CFrame = cam.CFrame:Lerp(targetCFrame, smoothingFactor)
-        targetLabel.Text = "Target: " .. target.Name
-        uiStroke.Color = Color3.fromRGB(255, 0, 0)
-        targetLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    if currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild(effectiveAimPart) then
+        local aimPart = currentTarget.Character[effectiveAimPart]
+        local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(aimPart.Position)
+        if onScreen then
+            local aimPartPos = aimPart.Position
+            local cam = workspace.CurrentCamera
+            local pos = cam.CFrame.Position
+            local targetCFrame = CFrame.new(pos, aimPartPos)
+            cam.CFrame = cam.CFrame:Lerp(targetCFrame, smoothingFactor)
+            targetLabel.Text = "Target: " .. currentTarget.Name
+            uiStroke.Color = Color3.fromRGB(255, 0, 0)
+            targetLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+        else
+            currentTarget = nil
+            targetLabel.Text = "Target: None"
+            uiStroke.Color = Color3.fromRGB(255, 255, 255)
+            targetLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        end
     else
         targetLabel.Text = "Target: None"
         currentTarget = nil
@@ -509,14 +526,13 @@ end
 local function updateFOVCircle()
     local cam = workspace.CurrentCamera
     if not cam then return end
-    local screenSize = cam.ViewportSize
-    local center = UserInputService:GetMouseLocation()
-
+    local mousePos = UserInputService:GetMouseLocation()
     local camFOV = cam.FieldOfView
+    local screenSize = cam.ViewportSize
     local fovRadius = math.tan(math.rad(fovAngle / 2)) / math.tan(math.rad(camFOV / 2)) * screenSize.Y / 2
 
     fovFrame.Size = UDim2.new(0, fovRadius * 2, 0, fovRadius * 2)
-    fovFrame.Position = UDim2.fromOffset(center.X, center.Y)
+    fovFrame.Position = UDim2.fromOffset(mousePos.X, mousePos.Y)
 end
 
 local function adjustFOV()
@@ -550,6 +566,8 @@ local function updateKeyBinding()
         if aimPartName == "Random" then
             randomAimPart = math.random() > 0.5 and "Head" or "HumanoidRootPart"
         end
+        local mousePos = UserInputService:GetMouseLocation()
+        currentTarget = getClosestPlayer(mousePos)
     end)
     table.insert(connections, inputBeganConnection)
 
@@ -565,7 +583,6 @@ end
 local function toggleButtons()
     buttonsVisible = not buttonsVisible
     settingsFrame.Visible = buttonsVisible
-    targetLabel.Visible = buttonsVisible
 end
 
 local function toggleBoxESP()
